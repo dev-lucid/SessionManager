@@ -26,7 +26,15 @@ class ssm
 		
 		foreach($config as $key=>$value)
 		{
-			$__ssm[$key] = $value;
+			if(is_array($value))
+			{
+				foreach($value as $subkey=>$subvalue)
+				{
+					$__ssm[$key][$subkey] = $subvalue;
+				}
+			}
+			else
+				$__ssm[$key] = $value;
 		}
 		
 		session_start();
