@@ -7,7 +7,7 @@ global $__ssm;
 $__ssm = array(
 	'do_user_info'=>true,
 	'do_language'=>true,
-	'log_hook'=>null,
+	'hooks'=>array(),
 	'default_language'=>array('en','us'),
 );
 
@@ -20,6 +20,23 @@ if(!defined(__ssm_force_user_language__))
 
 class ssm
 {
+	function call_hook($hook,$p0=null,$p1=null,$p2=null,$p3=null,$p4=null,$p5=null,$p6=null)
+	{
+		global $__ssm;
+		if(isset($__ssm['hooks'][$hook]))
+			$__ssm['hooks'][$hook]($p0,$p1,$p2,$p3,$p4,$p5,$p6);
+	}
+	
+	function log($to_write)
+	{
+		global $__ssm;		
+		if(isset($__ssm['hooks']['log']))
+		{
+			$to_write=(is_object($to_write) || is_array($to_write))?print_r($to_write,true):$to_write;
+			$__ssm['hooks']['log']('SSM: '.$to_write);
+		}
+	}
+	
 	function init($config=array())
 	{
 		global $__ssm;
@@ -30,7 +47,10 @@ class ssm
 			{
 				foreach($value as $subkey=>$subvalue)
 				{
-					$__ssm[$key][$subkey] = $subvalue;
+					if(is_numeric($subkey))
+						$__ssm[$key][] = $subvalue;
+					else
+						$__ssm[$key][$subkey] = $subvalue;
 				}
 			}
 			else
@@ -49,6 +69,10 @@ class ssm
 		}
 		
 		ssm::log('init complete: '.print_r($_SESSION,true));
+	}
+		
+	public static function deinit()
+	{
 	}
 	
 	function init_user_language()
@@ -129,16 +153,6 @@ class ssm
 			$info['device'] = 'desktop';
 
 		$_SESSION['user_info'] = $info;
-	}
-	
-	function log($to_write)
-	{
-		global $__ssm;
-		if(!is_null($__ssm['log_hook']))
-		{
-			$to_write=(is_object($to_write) || is_array($to_write))?print_r($to_write,true):$to_write;
-			$__ssm['log_hook']('SSM: '.$to_write);
-		}
 	}
 }
 
