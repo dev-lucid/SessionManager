@@ -57,7 +57,7 @@ class ssm
 				$__ssm[$key] = $value;
 		}
 		
-		session_start();
+		@session_start();
 		
 		if(($do_user_info && !isset($_SESSION['user_info'])) || __ssm_force_user_info__)
 		{
